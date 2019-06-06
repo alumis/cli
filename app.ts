@@ -94,9 +94,12 @@ function generateApiAsync(args: minimist.ParsedArgs) {
 
             processArgs.push('--config');
             processArgs.push(path.resolve(__dirname, args.config));
-        }        
+        }
 
-        var process = spawn('dotnet', processArgs, { cwd: './lib/typeScriptGenerator'});
+        
+        let p = path.resolve(path.dirname(__filename),'lib/typeScriptGenerator');
+
+        var process = spawn('dotnet', processArgs, { cwd: p });
 
         process.stdout.on('data', data => { console.log(data.toString('utf8'))  });
         process.stderr.on('data', data => { console.error('error: ' + data.toString('utf8'))  });
