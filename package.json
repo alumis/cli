@@ -1,6 +1,6 @@
 {
-  "name": "cli",
-  "version": "0.0.1",
+  "name": "@alumis/cli",
+  "version": "0.0.2",
   "description": "",
   "main": "app.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/alumis/cli.git"
   },
-  "author": "",
+  "author": "Andrew Nielsen Sadduq",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/alumis/cli/issues"
