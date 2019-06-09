@@ -52,7 +52,7 @@ function createMvcAsync(args: minimist.ParsedArgs) {
 
     return new Promise((resolve) => {
 
-        let n = args.n ? args.n : 'alumis-mvc';
+        let n = args.n ? args.n : args.name ? args.name : 'alumis-mvc';
         let p = args.o ? path.resolve(process.cwd(), args.o, n) : path.resolve(process.cwd(), n);
 
         if (!fs.existsSync(p)) {
