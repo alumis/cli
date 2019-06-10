@@ -3,7 +3,8 @@ import path from 'path';
 import fs from 'fs';
 import shell from 'shelljs';
 import * as FetchGithubRepo from 'fetch-github-repo';
-import { spawn } from 'child_process';
+import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
+import { rejects } from 'assert';
 
 const args = minimist.default(process.argv.slice(2));
 const cmd = args._[0];
@@ -55,15 +56,46 @@ function createMvcAsync(args: minimist.ParsedArgs) {
         let n = args.n ? args.n : args.name ? args.name : 'alumis-mvc';
         let p = args.o ? path.resolve(process.cwd(), args.o, n) : path.resolve(process.cwd(), n);
 
-        if (!fs.existsSync(p)) {
+        console.log(`Creating MVC project: ${n}`);
+        console.log(`Outputing to: ${p}`);
+
+        if (!fs.existsSync(p))
             shell.mkdir('-p', p);
-        }
+                
+        console.log(`Fetching scaffold...`);
 
         FetchGithubRepo.download({
             organization: 'alumis',
             repo: 'back-end-scaffold',
             path: p
-            }, resolve);
+            }, async () => 
+            {
+
+                try {
+                    console.log('Installing NPM packages...');
+                    await executeProcessAsync('npm', ['i'], {cwd: p});
+    
+                    console.log('Resolving .NET dependencies...');
+                    await executeProcessAsync('dotnet', ['restore'], { cwd: p });
+                }
+                catch(error) {
+
+                    return rejects(error);
+                }
+
+                resolve();
+            });
+    });
+}
+
+function executeProcessAsync(command: string, args?: string[], options?: SpawnOptionsWithoutStdio) {
+
+    return new Promise((resolve, reject) => {
+
+        var process = spawn(command, args, options);
+        process.stderr.on('data', data => { console.error('error: ' + data.toString('utf8'))  });
+        process.on('close', resolve);
+        process.on('error', reject);
     });
 }
 
