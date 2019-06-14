@@ -125,8 +125,6 @@ function generateApiAsync(args: minimist.ParsedArgs) {
         }        
 
         var process = spawn('dotnet', processArgs, { cwd: './' });
-
-        process.stdout.on('data', data => { console.log(data.toString('utf8'))  });
         process.stderr.on('data', data => { console.error('error: ' + data.toString('utf8'))  });
         process.on('close', resolve);
     });
