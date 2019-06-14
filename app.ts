@@ -25,11 +25,7 @@ switch(cmd) {
         throw Error('unknown command.');
 }
 
-promise
-    .then(() => {
-        console.log('done');
-    })
-    .catch(console.error);
+promise.catch(console.error);
 
 function executeCreateCommand(args: minimist.ParsedArgs) {
 
