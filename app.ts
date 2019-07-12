@@ -2,9 +2,8 @@ import * as minimist  from 'minimist';
 import path from 'path';
 import fs from 'fs';
 import shell from 'shelljs';
-import * as FetchGithubRepo from 'fetch-github-repo';
 import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
-import { rejects } from 'assert';
+import * as simplegit from 'simple-git/promise';
 
 const args = minimist.default(process.argv.slice(2));
 const cmd = args._[0];
@@ -45,43 +44,30 @@ function executeCreateCommand(args: minimist.ParsedArgs) {
 }
 
 
-function createMvcAsync(args: minimist.ParsedArgs) {
+async function createMvcAsync(args: minimist.ParsedArgs) {
 
-    return new Promise((resolve) => {
+    let n = args.n ? args.n : args.name ? args.name : 'alumis-mvc';
+    let p = args.o ? path.resolve(process.cwd(), args.o, n) : path.resolve(process.cwd(), n);
 
-        let n = args.n ? args.n : args.name ? args.name : 'alumis-mvc';
-        let p = args.o ? path.resolve(process.cwd(), args.o, n) : path.resolve(process.cwd(), n);
+    console.log(`Creating MVC project: ${n}`);
+    console.log(`Outputing to: ${p}`);
 
-        console.log(`Creating MVC project: ${n}`);
-        console.log(`Outputing to: ${p}`);
+    if (!fs.existsSync(p))
+        shell.mkdir('-p', p);
+            
+    console.log(`Fetching scaffold...`);
+    await fetchGithubRepoAsync('https://github.com/alumis/back-end-scaffold.git', p);
 
-        if (!fs.existsSync(p))
-            shell.mkdir('-p', p);
-                
-        console.log(`Fetching scaffold...`);
+    console.log('Installing NPM packages...');
+    await executeProcessAsync('npm', ['i'], {cwd: p});
 
-        FetchGithubRepo.download({
-            organization: 'alumis',
-            repo: 'back-end-scaffold',
-            path: p
-            }, async () => 
-            {
+    console.log('Resolving .NET dependencies...');
+    await executeProcessAsync('dotnet', ['restore'], { cwd: p });
+}
 
-                try {
-                    console.log('Installing NPM packages...');
-                    await executeProcessAsync('npm', ['i'], {cwd: p});
-    
-                    console.log('Resolving .NET dependencies...');
-                    await executeProcessAsync('dotnet', ['restore'], { cwd: p });
-                }
-                catch(error) {
+function fetchGithubRepoAsync(repoPath:string, localPath: string) {
 
-                    return rejects(error);
-                }
-
-                resolve();
-            });
-    });
+    return simplegit.default().clone(repoPath, localPath);
 }
 
 function executeProcessAsync(command: string, args?: string[], options?: SpawnOptionsWithoutStdio) {
