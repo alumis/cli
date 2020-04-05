@@ -27,7 +27,7 @@
     "@types/shelljs": "^0.8.5"
   },
   "dependencies": {
-    "minimist": "1.2.0",
+    "minimist": "1.2.3",
     "simple-git": "1.120.0",
     "shelljs": "0.8.3"
   }
